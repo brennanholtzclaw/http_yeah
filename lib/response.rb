@@ -5,15 +5,17 @@ class Response
   end
 
   def respond
+    request.request_counter += 1
     case parsed.path
     when "/"
       parsed_template
     when "/hello"
-      "Hello, World!"
+      request.hello_counter += 1
+      "Hello, World! #{request.hello_counter}"
     when "/datetime"
       formatted_time
     when "/shutdown"
-      "Total Requests: #{request_count}"
+      "Total Requests: #{request.request_counter}"
     end    
   end
   # 11:07AM on Sunday, October November 1, 2015.
