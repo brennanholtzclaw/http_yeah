@@ -14,6 +14,8 @@ class Server
     # @tcp_server = TCPServer.new(9292)
     # @response = Response.new(read_request)
     # @client = @tcp_server.accept
+    @hello_counter = -1
+    @request_counter = 0
   end
 
   def read_request
@@ -28,7 +30,7 @@ class Server
     end
     @responder = Response.new(request_lines)
 
-    response = "<pre>" + @responder.respond + "</pre>"
+    response = "<pre>" + @responder.respond(self) + "</pre>"
     output = "<html><head></head><body>#{response}</body></html>"
     headers = ["http/1.1 200 ok",
               "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
@@ -40,6 +42,8 @@ class Server
     break if @responder.parsed.path == "/shutdown"
     end
   end
+
+
 
   #
   # def procedure

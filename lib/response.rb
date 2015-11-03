@@ -17,23 +17,29 @@ class Response
   #   0
   # end
 
-  # def respond
-  #   # request_counter
-  #   case @parsed.path
-  #   when "/"
-  #     parsed_template
-  #   when "/hello"
-  #     "Hello, World! #{hello_counter}"
-  #     # "Hello World!"
-  #   when "/datetime"
-  #     formatted_time
-  #   when "/shutdown"
-  #     "Total Requests: #{request_counter}"
-  #   # when "/word_search" && parsed.verb == GET && parsed.parameter == "word"
-  #   #   if File.read("/usr/share/dict/words").include?(parsed.value)
-  #   #
-  #   end
-  # end
+  def respond(object)
+    object.request_counter += 1
+    case @parsed.path
+    when "/"
+      parsed_template
+    when "/hello"
+      object.hello_counter += 1
+      "Hello, World! #{object.hello_counter}"
+      # "Hello World!"
+    when "/datetime"
+      formatted_time
+    when "/shutdown"
+      "Total Requests: #{object.request_counter}"
+    when "/word_search"
+      if @parsed.verb == "GET" && @parsed.parameter == "word"
+        if File.read("/usr/share/dict/words").include?(@parsed.value)
+          "#{@parsed.value} is a known word(fragment)"
+        else
+          "#{@parsed.value} is not a known word(fragment?)"
+        end
+      end
+    end
+  end
   # 11:07AM on Sunday, October November 1, 2015.
 
   def formatted_time
