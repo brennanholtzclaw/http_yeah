@@ -8,14 +8,41 @@ class Parsed
 
   def parsed_template
 
-  "Verb: #{parsed(request_lines)[0]}
-  Path: #{parsed(request_lines)[1]}
-  Protocol: #{parsed(request_lines)[2]}
-  #{parsed(request_lines)[3]}
-  Port: #{parsed(request_lines)[4]}
-  Origin: #{parsed(request_lines)[5]}
-  #{parsed(request_lines)[6]}"
+  "Verb: #{verb}
+  Path: #{path}
+  Protocol: #{protocol}
+  Host: #{host}
+  Port: #{port}
+  Origin: #{origin}
+  Accept: #{accept}"
+  end
 
+  def verb
+    request[0].split[0]
+  end
+
+  def path
+    request[0].split[1]
+  end
+
+  def protocol
+    request[0].split[2]
+  end
+
+  def host
+    request[1].split[1][0..-6]
+  end
+
+  def port
+    request[1][-4..-1]
+  end
+
+  def origin
+    request[1].split[1][0..-6]
+  end
+
+  def accept
+    request[2].split[1]
   end
 
   def parsed(request)
