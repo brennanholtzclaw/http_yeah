@@ -23,5 +23,7 @@ end
 
 
 if __FILE__
-  request = Request.new.read_request
+  request = Request.new
+  request_lines = request.read_request
+  respond = Response.new(request_lines)
 end
