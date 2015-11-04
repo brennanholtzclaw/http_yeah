@@ -1,5 +1,6 @@
 require_relative 'parsed'
 require_relative 'http_server'
+require_relative 'game'
 require 'pry'
 
 class Response
@@ -7,36 +8,55 @@ class Response
   attr_accessor :hello_counter, :request_counter
 
   def initialize(request_lines)
-    # @hello_counter = -1
-    # @request_counter = 0
     @parsed = Parsed.new(request_lines)
   end
 
 
-  # def request_counter
-  #   0
-  # end
-
   def respond(object)
     object.request_counter += 1
+    if @parsed.verb == "GET"
+      get_response(object)
+    elsif @parsed.verb == "POST"
+      post_response
+    end
+  end
+
+  def post_response
+
+    if @parsed.path == "/start_game"
+      new_game = Game.new
+      "Good Luck! You've guessed #{new_game.counter} times."
+    elsif @parsed.path == "/game"
+      binding.pry
+      new_game.counter += 1
+      new_game.guess = @parsed.value
+      "Send a GET message to see if you are right"
+    end
+  end
+
+  def get_response(object)
     case @parsed.path
     when "/"
       parsed_template
     when "/hello"
       object.hello_counter += 1
       "Hello, World! #{object.hello_counter}"
-      # "Hello World!"
     when "/datetime"
       formatted_time
     when "/shutdown"
       "Total Requests: #{object.request_counter}"
     when "/word_search"
-      if @parsed.verb == "GET" && @parsed.parameter == "word"
-        if File.read("/usr/share/dict/words").include?(@parsed.value)
-          "#{@parsed.value} is a known word(fragment)"
-        else
-          "#{@parsed.value} is not a known word(fragment?)"
-        end
+      word_lookup
+    end
+  end
+
+  def word_lookup
+    if @parsed.parameter == "word"
+      dictionary = File.read("/usr/share/dict/words").split("\n")
+      if dictionary.include?(@parsed.value)
+        return "#{@parsed.value} is a word."
+      else
+        return "#{@parsed.value} is not a known word."
       end
     end
   end
@@ -48,12 +68,12 @@ class Response
   end
 
   def parsed_template
-  "Verb: #{@parsed.verb}
-  Path: #{@parsed.path}
-  Protocol: #{@parsed.protocol}
-  Host: #{@parsed.host}
-  Port: #{@parsed.port}
-  Origin: #{@parsed.origin}
-  Accept: #{@parsed.accept}"
+ "Verb: #{@parsed.verb}
+ Path: #{@parsed.path}
+ Protocol: #{@parsed.protocol}
+ Host: #{@parsed.host}
+ Port: #{@parsed.port}
+ Origin: #{@parsed.origin}
+ Accept: #{@parsed.accept}"
   end
 end

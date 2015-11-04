@@ -66,7 +66,7 @@ class Parsed
   end
 
   def accept
-    request_lines[2].split[1]
+    request_lines[2][8..-1]
   end
 
   # def parsed(request_lines)

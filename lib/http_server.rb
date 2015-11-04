@@ -29,7 +29,6 @@ class Server
       request_lines << line.chomp
     end
     @responder = Response.new(request_lines)
-
     response = "<pre>" + @responder.respond(self) + "</pre>"
     output = "<html><head></head><body>#{response}</body></html>"
     headers = ["http/1.1 200 ok",
