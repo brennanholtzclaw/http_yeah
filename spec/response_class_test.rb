@@ -19,8 +19,12 @@ class ResponseClassTest < Minitest::Test
       get_response_prep
 
       expectation = "Verb: GET\n Path: /\n Protocol: HTTP/1.1\n Host: 127.0.0.1\n Port: 9292\n Origin: 127.0.0.1\n Accept: text/html,application/xhtml+xml, application/xml;q=0.9,*/*;q=0.8"
-# binding.pry
       assert_equal expectation, @response.parsed_template
   end
 
+  def test_root_path_responds_with_template
+    get_response_prep
+
+    assert_equal @response.parsed_template, @response.respond(Server.new) #passed Server.new to simulate object.
+  end
 end
