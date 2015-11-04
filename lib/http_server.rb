@@ -4,10 +4,10 @@ require 'pry'
 require_relative 'request'
 require_relative 'parsed'
 require_relative 'response'
-counter = -1
+
 
 class Server
-  attr_accessor :hello_counter, :request_counter, :responder
+  attr_accessor :hello_counter, :request_counter, :responder, :new_game
   attr_reader :request
 
   def initialize
@@ -21,28 +21,35 @@ class Server
   def read_request
     tcp_server = TCPServer.new(9292)
     loop do
-    client = tcp_server.accept
+    @client = tcp_server.accept
     # loop do
   puts "Ready for a request"
   request_lines = []
-    while line = client.gets and !line.chomp.empty?
+    while line = @client.gets and !line.chomp.empty?
       request_lines << line.chomp
     end
-    @responder = Response.new(request_lines)
-    response = "<pre>" + @responder.respond(self) + "</pre>"
-    output = "<html><head></head><body>#{response}</body></html>"
-    headers = ["http/1.1 200 ok",
-              "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
-              "server: ruby",
-              "content-type: text/html; charset=iso-8859-1",
-              "content-length: #{output.length}\r\n\r\n"].join("\r\n")
-    client.puts headers
-    client.puts output
-    break if @responder.parsed.path == "/shutdown"
+    @responder = Response.new(request_lines, self)
+    if @responder.parsed.path == "/start_game" && @responder.parsed.verb == "POST"
+      @new_game = Game.new
     end
+    @client.puts @responder.response_compiler(self)
+    break if @responder.parsed.path == "/shutdown"
+
+    @client.close
+    end
+    # @client.close
   end
 
+  # response = "<pre> #{@responder.respond(self)}  </pre>"
+  # output = "<html><head></head><body>#{response}</body></html>"
+  # headers = ["http/1.1 200 ok",
+  #           "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
+  #           "server: ruby",
+  #           "content-type: text/html; charset=iso-8859-1",
+  #           "content-length: #{output.length}\r\n\r\n"].join("\r\n")
+  # client.puts headers
 
+#GET / HTTP/1.1
 
   #
   # def procedure
@@ -74,4 +81,3 @@ if __FILE__ == $0
   @request = Server.new
   @request.read_request
 end
-

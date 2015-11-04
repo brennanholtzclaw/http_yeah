@@ -11,16 +11,29 @@ class Parsed
     # @host = @request_lines[1]
   end
 
+  def parsed_hash
+    parsed_hash = {}
+    @request_lines.each_with_index do |element, index|
+      if index > 0
+        split_element = element.split(":")
+        parsed_hash[split_element[0]] = split_element[1][1..-1]
+        if split_element[0] == "Host"
+          parsed_hash["Port"] = split_element[2]
+        end
+      end
+    end
+    parsed_hash
+  end
+
 
   def parsed_template
-
-  "Verb: #{verb}
-  Path: #{path}
-  Protocol: #{protocol}
-  Host: #{host}
-  Port: #{port}
-  Origin: #{origin}
-  Accept: #{accept}"
+    "Verb: #{verb}
+    Path: #{path}
+    Protocol: #{protocol}
+    Host: #{host}
+    Port: #{port}
+    Origin: #{origin}
+    Accept: #{accept}"
   end
 
   def verb
@@ -28,11 +41,11 @@ class Parsed
   end
 
   def path
-    initial = request_lines[0].split[1]
-    if initial.include?("?")
-      initial.split("?")[0]
+    path_without_params = request_lines[0].split[1]
+    if path_without_params.include?("?")
+      path_without_params.split("?")[0]
     else
-      initial
+      path_without_params
     end
   end
 
@@ -54,19 +67,25 @@ class Parsed
   end
 
   def host
-    request_lines[1].split[1][0..-6]
+    parsed_hash["Host"]
   end
 
   def port
-    request_lines[1][-4..-1]
+    parsed_hash["Port"]
+    # request_lines[1][-4..-1]
   end
 
   def origin
-    request_lines[1].split[1][0..-6]
+    parsed_hash["Host"]
+    # request_lines[1].split[1][0..-6]
   end
 
   def accept
-    request_lines[2][8..-1]
+    parsed_hash["Accept"]
+  end
+
+  def accept_encoding
+    parsed_hash["Accept-Encoding"]
   end
 
   # def parsed(request_lines)

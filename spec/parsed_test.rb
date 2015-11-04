@@ -19,7 +19,7 @@ class ParsedTest < Minitest::Test
   end
 
   def test_path_is_parsed_from_incoming_array
-    assert_equal "/", @parsed.path
+    assert_equal "/pizza", @parsed.path
   end
 
   def test_protocol_is_parsed_from_incoming_array
@@ -39,8 +39,13 @@ class ParsedTest < Minitest::Test
   end
 
   def test_accept_is_parsed_from_incoming_array
-    accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+    accept = "text/html,application/xhtml+xml, application/xml;q=0.9,*/*;q=0.8"
     assert_equal accept, @parsed.accept
   end
+
+  def test_accept_encoding_is_parsed_from_incoming_array
+    assert_equal "gzip, deflate", @parsed.accept_encoding
+  end
+
 
 end

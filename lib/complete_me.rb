@@ -13,7 +13,6 @@ class CompleteMe
     loop do
       arr << word[0..counter]
       counter += 1
-    #  binding.pry
       break if counter == length
     end
     arr
