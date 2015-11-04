@@ -37,14 +37,14 @@ class GameTest < Minitest::Test
   def test_game_tells_you_if_guess_is_high_or_low
     game = Game.new(5)
 
-    too_high = "That guess was too high"
+    too_high = "Too low!"
     assert_equal too_high, game.guess(9)
 
 
-    too_low = "That guess was too low"
+    too_low = "Too high!"
     assert_equal too_low, game.guess(1)
 
-    just_right = "That's correct!"
+    just_right = "CORRECT!"
     assert_equal just_right, game.guess(5)
   end
 
