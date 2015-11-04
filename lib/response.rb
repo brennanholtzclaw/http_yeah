@@ -22,7 +22,6 @@ class Response
   end
 
   def post_response
-
     if @parsed.path == "/start_game"
       new_game = Game.new
       "Good Luck! You've guessed #{new_game.counter} times."
