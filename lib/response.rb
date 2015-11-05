@@ -23,33 +23,41 @@ class Response
   def header_paths
 
     if @parsed.path == "/game" && @parsed.verb == "POST"
-      ["HTTP/1.1 303 Temporary Redirect",
-      "Location: http://127.0.0.1:9292/game\r\n\r\n"].join("\r\n")
+      header_template("303 Temprary Redirect", "http://127.0.0.1:9292/game")
+      # ["HTTP/1.1 303 Temporary Redirect",
+      # "Location: http://127.0.0.1:9292/game\r\n\r\n"].join("\r\n")
     elsif @parsed.path == "/new_game" && @parsed.verb == "POST" && @server.new_game.nil?
-      #301 redirect to POST /start_game
-
-      ["HTTP/1.1 307 Found",
-      "Location: http://127.0.0.1:9292/start_game\r\n\r\n"].join("\r\n")
+      header_template("307 Redirect", "http://127.0.0.1:9292/start_game")
+      #
+      # ["HTTP/1.1 307 Found",
+      # "Location: http://127.0.0.1:9292/start_game\r\n\r\n"].join("\r\n")
     elsif @parsed.path == "/new_game" && !@server.new_game.nil?
-      #403 Forbidden!
-      ["HTTP/1.1 403 Forbidden",
-      "Location: http://127.0.0.1:9292\r\n\r\n"].join("\r\n")
-    # elsif @parsed.path == "/start_game"
-    #   ["HTTP/1.1 307 Redirect",
-    #   "Location: http://127.0.0.1:9292/new_game\r\n\r\n"].join("\r\n")
+
+      header_template("403 Forbidden")
+      # ["HTTP/1.1 403 Forbidden",
+      # "Location: http://127.0.0.1:9292\r\n\r\n"].join("\r\n")
     elsif good_paths.include?(@parsed.path)
+      ok_header_template
+    elsif @parsed.path == "/force_error"
+      raise SystemError
+    else
+      header_template("404 Page Not Found")
+      # ["HTTP/1.1 ",
+      # "Location: http://127.0.0.1:9292\r\n\r\n"].join("\r\n")
+    end
+  end
+
+  def ok_header_template
     ["http/1.1 200 ok",
       "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
       "server: ruby",
       "content-type: text/html; charset=iso-8859-1",
       "content-length: #{output_path_body.length + 1}\r\n\r\n"].join("\r\n")
-    elsif @parsed.path == "/force_error"
-      raise SystemError
-    else
-      #404 File Not Found
-      ["HTTP/1.1 404 Page Not Found",
-      "Location: http://127.0.0.1:9292\r\n\r\n"].join("\r\n")
-    end
+  end
+
+  def header_template(code, location="http://127.0.0.1:9292")
+    ["HTTP/1.1 #{code}",
+    "Location: #{location}\r\n\r\n"].join("\r\n")
   end
 
   def good_paths
