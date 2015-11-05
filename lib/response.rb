@@ -7,7 +7,7 @@ class Response
   attr_reader :parsed
   attr_accessor :new_game
 
-  def initialize(request_lines, server)
+  def initialize(request_lines, server=Server.new)
     @parsed = Parsed.new(request_lines)
     @server = server
   end
@@ -22,7 +22,7 @@ class Response
 
   def header_paths
     if @parsed.path == "/game" && @parsed.verb == "POST"
-      header_template("303 Temprary Redirect", "http://127.0.0.1:9292/game")
+      header_template("303 Temporary Redirect", "http://127.0.0.1:9292/game")
     elsif @parsed.path == "/new_game" && @parsed.verb == "POST" && @server.new_game.nil?
       header_template("307 Redirect", "http://127.0.0.1:9292/start_game")
     elsif @parsed.path == "/new_game" && !@server.new_game.nil?

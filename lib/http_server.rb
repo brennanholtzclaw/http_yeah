@@ -55,7 +55,7 @@ def send_response
   begin
     @client.puts @responder.response_compiler(self)
   rescue => detail
-  
+    binding.pry
     response = "<pre>#{detail.message}\n#{detail.backtrace.join("\n")}</pre>"
     output = "<html><head></head><body>#{response}</body></html>"
     headers = ["http/1.1 500 Error",
