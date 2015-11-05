@@ -55,7 +55,8 @@ def send_response
   begin
     @client.puts @responder.response_compiler(self)
   rescue => detail
-    response = "<pre>#{detail.backtrace.join("\n")}</pre>".delete!("<main>")
+  
+    response = "<pre>#{detail.message}\n#{detail.backtrace.join("\n")}</pre>"
     output = "<html><head></head><body>#{response}</body></html>"
     headers = ["http/1.1 500 Error",
       "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
