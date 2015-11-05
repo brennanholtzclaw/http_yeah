@@ -21,29 +21,18 @@ class Response
   end
 
   def header_paths
-
     if @parsed.path == "/game" && @parsed.verb == "POST"
       header_template("303 Temprary Redirect", "http://127.0.0.1:9292/game")
-      # ["HTTP/1.1 303 Temporary Redirect",
-      # "Location: http://127.0.0.1:9292/game\r\n\r\n"].join("\r\n")
     elsif @parsed.path == "/new_game" && @parsed.verb == "POST" && @server.new_game.nil?
       header_template("307 Redirect", "http://127.0.0.1:9292/start_game")
-      #
-      # ["HTTP/1.1 307 Found",
-      # "Location: http://127.0.0.1:9292/start_game\r\n\r\n"].join("\r\n")
     elsif @parsed.path == "/new_game" && !@server.new_game.nil?
-
       header_template("403 Forbidden")
-      # ["HTTP/1.1 403 Forbidden",
-      # "Location: http://127.0.0.1:9292\r\n\r\n"].join("\r\n")
     elsif good_paths.include?(@parsed.path)
       ok_header_template
     elsif @parsed.path == "/force_error"
       raise SystemError
     else
       header_template("404 Page Not Found")
-      # ["HTTP/1.1 ",
-      # "Location: http://127.0.0.1:9292\r\n\r\n"].join("\r\n")
     end
   end
 
@@ -114,8 +103,6 @@ class Response
       "Good Luck!"
     elsif @parsed.path == "/game"
       object.new_game.guessed_number = object.body_params[3]
-    # elsif @parsed.path == "/new_game"
-    #   "Good MotherFUCKING Luck"
     end
   end
 
@@ -129,7 +116,6 @@ class Response
       end
     end
   end
-  # 11:07AM on Sunday, October November 1, 2015.
 
   def formatted_time
     t = Time.new
