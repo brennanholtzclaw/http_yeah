@@ -21,33 +21,39 @@ class Response
   end
 
   def header_paths
+
     if @parsed.path == "/game" && @parsed.verb == "POST"
       ["HTTP/1.1 303 Temporary Redirect",
       "Location: http://127.0.0.1:9292/game\r\n\r\n"].join("\r\n")
     elsif @parsed.path == "/new_game" && @parsed.verb == "POST" && @server.new_game.nil?
       #301 redirect to POST /start_game
-      ["HTTP/1.1 301 Moved Permanently",
+
+      ["HTTP/1.1 307 Found",
       "Location: http://127.0.0.1:9292/start_game\r\n\r\n"].join("\r\n")
     elsif @parsed.path == "/new_game" && !@server.new_game.nil?
       #403 Forbidden!
       ["HTTP/1.1 403 Forbidden",
       "Location: http://127.0.0.1:9292\r\n\r\n"].join("\r\n")
+    # elsif @parsed.path == "/start_game"
+    #   ["HTTP/1.1 307 Redirect",
+    #   "Location: http://127.0.0.1:9292/new_game\r\n\r\n"].join("\r\n")
     elsif good_paths.include?(@parsed.path)
     ["http/1.1 200 ok",
       "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
       "server: ruby",
       "content-type: text/html; charset=iso-8859-1",
       "content-length: #{output_path_body.length + 1}\r\n\r\n"].join("\r\n")
+    elsif @parsed.path == "/force_error"
+      raise SystemError
     else
       #404 File Not Found
       ["HTTP/1.1 404 Page Not Found",
       "Location: http://127.0.0.1:9292\r\n\r\n"].join("\r\n")
-
     end
   end
 
   def good_paths
-    ["/", "/hello", "/shutdown", "/start_game", "/datetime", "/word_search"]
+    ["/", "/hello", "/shutdown", "/start_game", "/datetime", "/word_search", "/game"]
   end
 
   def response_compiler(object)
@@ -85,8 +91,11 @@ class Response
     when "/word_search"
       word_lookup
     when "/game"
-      "You've taken #{object.game_counter} guesses. Your last guess was... #{object.new_game.guessed_number}, which is #{object.new_game.guess(object.new_game.guessed_number)}"
-      #when none of these - pass in a 500
+      # if object.game_counter == 0
+      # "You've taken #{object.game_counter} guesses."
+      # else
+        "You've taken #{object.game_counter} guesses.Your last guess was... #{object.new_game.guessed_number}, which is #{object.new_game.guess(object.new_game.guessed_number)}"
+      # end
     end
   end
 
@@ -97,6 +106,8 @@ class Response
       "Good Luck!"
     elsif @parsed.path == "/game"
       object.new_game.guessed_number = object.body_params[3]
+    # elsif @parsed.path == "/new_game"
+    #   "Good MotherFUCKING Luck"
     end
   end
 
