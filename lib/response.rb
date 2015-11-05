@@ -88,11 +88,7 @@ class Response
     when "/word_search"
       word_lookup
     when "/game"
-      # if object.game_counter == 0
-      # "You've taken #{object.game_counter} guesses."
-      # else
         "You've taken #{object.game_counter} guesses.Your last guess was... #{object.new_game.guessed_number}, which is #{object.new_game.guess(object.new_game.guessed_number)}"
-      # end
     end
   end
 
