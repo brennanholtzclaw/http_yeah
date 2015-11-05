@@ -21,17 +21,29 @@ class Response
     if @parsed.path == "/game" && @parsed.verb == "POST"
       ["HTTP/1.1 303 Temporary Redirect",
       "Location: http://127.0.0.1:9292/game\r\n\r\n"].join("\r\n")
-    else
+    elsif @parsed.path == "/new_game" && object.new_game.nil?
+      #301 redirect to POST /start_game
+      ["HTTP/1.1 301 Moved Permanently",
+      "Location: http://127.0.0.1:9292/start_game\r\n\r\n"].join("\r\n")
+    elsif @parsed.path == "/new_game" && !object.new_game.nil?
+      #403 Forbidden!
+      ["HTTP/1.1 403 Forbidden",
+      "Location: http://127.0.0.1:9292\r\n\r\n"].join("\r\n")
+    elsif 
     ["http/1.1 200 ok",
       "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
       "server: ruby",
       "content-type: text/html; charset=iso-8859-1",
-      "content-length: #{output_path.length - 9}\r\n\r\n"].join("\r\n")
+      "content-length: #{output_path.length + 1}\r\n\r\n"].join("\r\n")
+    else
+      #404 File Not Found
+      ["HTTP/1.1 404 Page Not Found",
+      "Location: http://127.0.0.1:9292\r\n\r\n"].join("\r\n")
     end
   end
 
   def response_compiler(object)
-    # binding.pry
+    #
     if @parsed.path == "/game" && @parsed.verb == "POST"
       post_response(object)
       "#{header_paths}"
@@ -43,7 +55,7 @@ class Response
 # unless @parsed.path == "/game" && @parsed.verb == "POST"
 
   def respond(object)
-    binding.pry
+    #
     object.request_counter += 0.5
     if @parsed.verb == "GET"
       get_response(object)
@@ -68,18 +80,19 @@ class Response
       word_lookup
     when "/game"
       "You've taken #{object.new_game.counter} guesses. Your last guess was... #{object.new_game.guessed_number}, which is #{object.new_game.guess(object.new_game.guessed_number)}"
+      #when none of these - pass in a 500
     end
   end
 
+
+
   def post_response(object)
-    binding.pry
+    #
     if @parsed.path == "/start_game"
       "Good Luck!"
     elsif @parsed.path == "/game"
-      binding.pry
       object.new_game.counter += 1
-      object.new_game.guess(@parsed.value)
-
+      object.new_game.guess(object.body_params[3])
     end
   end
 

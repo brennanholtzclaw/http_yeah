@@ -1,4 +1,5 @@
 require 'socket'
+require 'net/http'
 # require 'open-uri'
 require 'pry'
 require_relative 'request'
@@ -7,37 +8,75 @@ require_relative 'response'
 
 
 class Server
-  attr_accessor :hello_counter, :request_counter, :responder, :new_game
-  attr_reader :request
+  attr_accessor :hello_counter,
+                :request_counter,
+                :responder,
+                :new_game
+                :client
+                :tcp_server
+
+  attr_reader :request,
+              :tcp_server,
+              :body_params
 
   def initialize
     # @tcp_server = TCPServer.new(9292)
     # @response = Response.new(read_request)
     # @client = @tcp_server.accept
-    @hello_counter = -1
+    @hello_counter   = -1
     @request_counter = 0
+    @tcp_server      = TCPServer.new(9292)
   end
 
   def read_request
-    tcp_server = TCPServer.new(9292)
     loop do
-    @client = tcp_server.accept
-    # loop do
-  puts "Ready for a request"
-  request_lines = []
-    while line = @client.gets and !line.chomp.empty?
-      request_lines << line.chomp
-    end
-    @responder = Response.new(request_lines, self)
-    if @responder.parsed.path == "/start_game" && @responder.parsed.verb == "POST"
-      @new_game = Game.new
-    end
-    @client.puts @responder.response_compiler(self)
-    break if @responder.parsed.path == "/shutdown"
+      @client = tcp_server.accept
 
-    @client.close
+      puts "Ready for a request"
+      # # loop do
+      request_lines = []
+
+      while line = @client.gets and !line.chomp.empty?
+        request_lines << line.chomp
+      end
+
+
+        # binding.pry
+        # while line = @client.gets and !line.chomp.empty? and empty_line < 3
+        #   empty_line += 1 if line == "\r\n"
+        #   # binding.pry
+        #   # puts line
+        #   request_lines << line.chomp
+
+
+
+      # end
+
+      @responder = Response.new(request_lines, self)
+
+      if @responder.parsed.path == "/start_game" && @responder.parsed.verb == "POST"
+        @new_game = Game.new
+      end
+
+      if @responder.parsed.path == "/game" && @responder.parsed.verb == "POST"
+        web_kit_counter = 0
+        @body_params = []
+
+        until web_kit_counter == 2
+          line = @client.gets
+          @body_params << line.chomp
+
+          if line.start_with?("------WebKitFormBoundary")
+            web_kit_counter += 1
+          end
+        end
+      end
+      @client.puts @responder.response_compiler(self)
+
+      break if @responder.parsed.path == "/shutdown"
+
+      @client.close
     end
-    # @client.close
   end
 
   # response = "<pre> #{@responder.respond(self)}  </pre>"
@@ -78,6 +117,6 @@ end
 
 
 if __FILE__ == $0
-  @request = Server.new
-  @request.read_request
+  request = Server.new
+  request.read_request
 end
