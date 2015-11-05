@@ -13,33 +13,41 @@ class Response
   end
 
   def output_path
-    body_response = "<pre>#{respond(@server)}</pre>"
-    "<html><head></head><body>#{body_response}</body></html>"
+    "<pre>#{respond(@server)}</pre>"
+  end
+
+  def output_path_body
+    "<html><head></head><body><pre>#{respond(@server)}</pre></body></html>"
   end
 
   def header_paths
     if @parsed.path == "/game" && @parsed.verb == "POST"
       ["HTTP/1.1 303 Temporary Redirect",
       "Location: http://127.0.0.1:9292/game\r\n\r\n"].join("\r\n")
-    elsif @parsed.path == "/new_game" && object.new_game.nil?
+    elsif @parsed.path == "/new_game" && @parsed.verb == "POST" && @server.new_game.nil?
       #301 redirect to POST /start_game
       ["HTTP/1.1 301 Moved Permanently",
       "Location: http://127.0.0.1:9292/start_game\r\n\r\n"].join("\r\n")
-    elsif @parsed.path == "/new_game" && !object.new_game.nil?
+    elsif @parsed.path == "/new_game" && !@server.new_game.nil?
       #403 Forbidden!
       ["HTTP/1.1 403 Forbidden",
       "Location: http://127.0.0.1:9292\r\n\r\n"].join("\r\n")
-    elsif 
+    elsif good_paths.include?(@parsed.path)
     ["http/1.1 200 ok",
       "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
       "server: ruby",
       "content-type: text/html; charset=iso-8859-1",
-      "content-length: #{output_path.length + 1}\r\n\r\n"].join("\r\n")
+      "content-length: #{output_path_body.length + 1}\r\n\r\n"].join("\r\n")
     else
       #404 File Not Found
       ["HTTP/1.1 404 Page Not Found",
       "Location: http://127.0.0.1:9292\r\n\r\n"].join("\r\n")
+
     end
+  end
+
+  def good_paths
+    ["/", "/hello", "/shutdown", "/start_game", "/datetime", "/word_search"]
   end
 
   def response_compiler(object)
@@ -48,11 +56,9 @@ class Response
       post_response(object)
       "#{header_paths}"
     else
-    "#{header_paths}\n#{output_path}"
+    "#{header_paths}\n#{output_path_body}"
     end
   end
-
-# unless @parsed.path == "/game" && @parsed.verb == "POST"
 
   def respond(object)
     #
@@ -79,7 +85,7 @@ class Response
     when "/word_search"
       word_lookup
     when "/game"
-      "You've taken #{object.new_game.counter} guesses. Your last guess was... #{object.new_game.guessed_number}, which is #{object.new_game.guess(object.new_game.guessed_number)}"
+      "You've taken #{object.game_counter} guesses. Your last guess was... #{object.new_game.guessed_number}, which is #{object.new_game.guess(object.new_game.guessed_number)}"
       #when none of these - pass in a 500
     end
   end
@@ -87,12 +93,10 @@ class Response
 
 
   def post_response(object)
-    #
     if @parsed.path == "/start_game"
       "Good Luck!"
     elsif @parsed.path == "/game"
-      object.new_game.counter += 1
-      object.new_game.guess(object.body_params[3])
+      object.new_game.guessed_number = object.body_params[3]
     end
   end
 

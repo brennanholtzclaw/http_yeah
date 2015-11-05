@@ -3,19 +3,16 @@ class Game
   attr_accessor :counter, :guessed_number
   attr_reader :correct_number
 
-  def initialize(correct_number = rand(1..10).to_s)
-    @counter = 0
+  def initialize(correct_number = rand(1..10))
     @correct_number = correct_number
     @guessed_number = 0
   end
 
-  def guess(number)
-
-    @counter += 1
-    @guessed_number = number
-    if @guessed_number < @correct_number
+  def guess(number = @guessed_number)
+        # @guessed_number = number
+    if number.to_i < @correct_number
       return "Too low!"
-    elsif @guessed_number > @correct_number
+    elsif number.to_i > @correct_number
       return "Too high!"
     else
       return "CORRECT!"
@@ -70,6 +67,5 @@ class Game
 # response = "<pre>" + @responder.respond(self) + "</pre>"
 # output = "<html><head></head><body>#{response}</body></html>"
 # headers = ["http/1.1 200 ok",
-
 
 end
